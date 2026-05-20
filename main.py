@@ -23,5 +23,16 @@ def contact():
     return render_template("contact.html")
 
 
+@app.route("/posts/<int:id>")
+def post_show(id):
+    requested_post = None
+
+    for post in posts:
+        if post["id"] == id:
+            requested_post = post
+
+    return render_template("post.html", post=requested_post)
+
+
 if __name__ == "__main__":
     app.run(debug=True)
