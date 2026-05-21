@@ -1,7 +1,9 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
+from dotenv import load_dotenv
 import requests
 
 app = Flask(__name__)
+load_dotenv()
 
 res = requests.get("https://api.npoint.io/8a2f0b7cba1b18c6eaea")
 res.raise_for_status()
@@ -18,9 +20,20 @@ def about():
     return render_template("about.html")
 
 
-@app.route("/contact")
+@app.route("/contact", methods=["GET", "POST"])
 def contact():
-    return render_template("contact.html")
+    if request.method == "GET":
+        return render_template("contact.html")
+    else:
+        name = request.form["name"]
+        email = request.form["email"]
+        phone = request.form["phone"]
+        message = request.form["message"]
+        print(name)
+        print(email)
+        print(phone)
+        print(message)
+        return render_template("form-entry.html")
 
 
 @app.route("/posts/<int:id>")
