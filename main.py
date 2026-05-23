@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request
 from dotenv import load_dotenv
 import requests
+import smtplib
+import os
 
 app = Flask(__name__)
 load_dotenv()
@@ -23,17 +25,20 @@ def about():
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
     if request.method == "GET":
-        return render_template("contact.html")
+        return render_template("contact.html", form_redirect=False)
     else:
-        name = request.form["name"]
-        email = request.form["email"]
-        phone = request.form["phone"]
-        message = request.form["message"]
-        print(name)
-        print(email)
-        print(phone)
-        print(message)
-        return render_template("form-entry.html")
+        with smtplib.SMTP(os.getenv("SMTP_HOST"), port=587) as connection:
+            connection.starttls()
+            connection.login(
+                user=os.getenv("GMAIL_ADDRESS"),
+                password=os.getenv("GMAIL_APP_PASSWORD")
+            )
+            connection.sendmail(
+                from_addr=request.form["email"],
+                to_addrs=os.getenv("GMAIL_ADDRESS"),
+                msg=f"Subject: Contact from {request.form['name']}\n\n{request.form['message']}"
+            )
+        return render_template("contact.html", form_redirect=True)
 
 
 @app.route("/posts/<int:id>")
